@@ -262,7 +262,7 @@
 									"});",
 									"",
 									"pm.test(\"Mensagem de erro e clara\", function () {",
-									"    pm.expect(body.error).to.eql(\"Recurso nao encontrado\");",
+									"    pm.expect(body.error).to.eql(\"Recurso não encontrado\");",
 									"});"
 								],
 								"type": "text/javascript",
