@@ -1,0 +1,707 @@
+{
+	"info": {
+		"_postman_id": "7eaaaf50-4ec9-42b4-8c30-db6d9f98b19c",
+		"name": "animais-api",
+		"description": "Testes da API de adocao de animais (Engenharia de Software - Universidade de Vassouras). Cobre CRUD completo, validacoes Jakarta Bean Validation e tratamento global de erros. Rode a pasta 01 primeiro (ela cria e usa {{animalId}} nas demais).",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "01 - Fluxo Principal (CRUD completo)",
+			"description": "Cobre os 5 endpoints pedidos no enunciado, na ordem: criar, listar, buscar, atualizar e excluir o mesmo animal.",
+			"item": [
+				{
+					"name": "1. Criar Animal (POST /animais)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code e 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Header Location esta presente\", function () {",
+									"    pm.expect(pm.response.headers.has(\"Location\")).to.be.true;",
+									"});",
+									"",
+									"const body = pm.response.json();",
+									"",
+									"pm.test(\"Corpo contem os dados enviados e status inicial DISPONIVEL\", function () {",
+									"    pm.expect(body.nome).to.eql(\"Rex\");",
+									"    pm.expect(body.especie).to.eql(\"Cachorro\");",
+									"    pm.expect(body.status).to.eql(\"DISPONIVEL\");",
+									"});",
+									"",
+									"pm.collectionVariables.set(\"animalId\", body.id);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/animais",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"animais"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nome\": \"Rex\",\n    \"especie\": \"Cachorro\",\n    \"raca\": \"SRD\",\n    \"idade\": 3\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": [],
+					"description": "Requisito: POST /animais deve retornar 201 Created com header Location."
+				},
+				{
+					"name": "2. Listar Animais (GET /animais)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code e 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const body = pm.response.json();",
+									"",
+									"pm.test(\"Resposta e uma lista\", function () {",
+									"    pm.expect(body).to.be.an(\"array\");",
+									"});",
+									"",
+									"pm.test(\"Lista contem o animal criado no passo anterior\", function () {",
+									"    const ids = body.map(a => a.id);",
+									"    pm.expect(ids).to.include(pm.collectionVariables.get(\"animalId\"));",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/animais",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"animais"
+							]
+						}
+					},
+					"response": [],
+					"description": "Requisito: GET /animais deve retornar 200 OK com a lista de animais."
+				},
+				{
+					"name": "3. Buscar Animal por ID (GET /animais/{id})",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code e 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const body = pm.response.json();",
+									"",
+									"pm.test(\"Retorna o animal correto\", function () {",
+									"    pm.expect(body.id).to.eql(pm.collectionVariables.get(\"animalId\"));",
+									"    pm.expect(body.nome).to.eql(\"Rex\");",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/animais/{{animalId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"animais",
+								"{{animalId}}"
+							]
+						}
+					},
+					"response": [],
+					"description": "Requisito: GET /animais/{id} deve retornar 200 OK quando o animal existe."
+				},
+				{
+					"name": "4. Atualizar Animal (PUT /animais/{id})",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code e 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const body = pm.response.json();",
+									"",
+									"pm.test(\"Idade e status foram atualizados\", function () {",
+									"    pm.expect(body.idade).to.eql(4);",
+									"    pm.expect(body.status).to.eql(\"ADOTADO\");",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/animais/{{animalId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"animais",
+								"{{animalId}}"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nome\": \"Rex\",\n    \"especie\": \"Cachorro\",\n    \"raca\": \"SRD\",\n    \"idade\": 4,\n    \"status\": \"ADOTADO\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": [],
+					"description": "Requisito: PUT /animais/{id} deve retornar 200 OK e aplicar a atualizacao completa (inclusive status)."
+				},
+				{
+					"name": "5. Excluir Animal (DELETE /animais/{id})",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code e 204\", function () {",
+									"    pm.response.to.have.status(204);",
+									"});",
+									"",
+									"pm.test(\"Corpo da resposta esta vazio\", function () {",
+									"    pm.expect(pm.response.text()).to.eql(\"\");",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/animais/{{animalId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"animais",
+								"{{animalId}}"
+							]
+						}
+					},
+					"response": [],
+					"description": "Requisito: DELETE /animais/{id} deve retornar 204 No Content."
+				},
+				{
+					"name": "6. Confirmar Exclusao (GET /animais/{id} apos DELETE)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code e 404 apos exclusao\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"const body = pm.response.json();",
+									"",
+									"pm.test(\"Erro nao expoe stack trace\", function () {",
+									"    pm.expect(body.trace).to.be.undefined;",
+									"});",
+									"",
+									"pm.test(\"Mensagem de erro e clara\", function () {",
+									"    pm.expect(body.error).to.eql(\"Recurso nao encontrado\");",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/animais/{{animalId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"animais",
+								"{{animalId}}"
+							]
+						}
+					},
+					"response": [],
+					"description": "Requisito: apos excluido, o mesmo ID deve responder 404, sem vazar stack trace."
+				}
+			]
+		},
+		{
+			"name": "02 - Validacao (400 Bad Request)",
+			"description": "Cobre as validacoes do Jakarta Bean Validation na fronteira HTTP e os casos de corpo/URL malformados tratados pelo GlobalExceptionHandler.",
+			"item": [
+				{
+					"name": "Criar com nome vazio",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code e 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"const body = pm.response.json();",
+									"",
+									"pm.test(\"Erro aponta o campo nome\", function () {",
+									"    const campos = body.errors.map(e => e.field);",
+									"    pm.expect(campos).to.include(\"nome\");",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/animais",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"animais"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nome\": \"\",\n    \"especie\": \"Cachorro\",\n    \"raca\": \"SRD\",\n    \"idade\": 3\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": [],
+					"description": "Requisito: Jakarta Bean Validation (@NotBlank) deve rejeitar nome vazio com 400."
+				},
+				{
+					"name": "Criar sem idade (campo obrigatorio ausente)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code e 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"const body = pm.response.json();",
+									"",
+									"pm.test(\"Erro aponta o campo idade\", function () {",
+									"    const campos = body.errors.map(e => e.field);",
+									"    pm.expect(campos).to.include(\"idade\");",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/animais",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"animais"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nome\": \"Fido\",\n    \"especie\": \"Cachorro\",\n    \"raca\": \"SRD\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": [],
+					"description": "Requisito: Jakarta Bean Validation (@NotNull) deve rejeitar idade ausente com 400."
+				},
+				{
+					"name": "Criar com idade negativa",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code e 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"const body = pm.response.json();",
+									"",
+									"pm.test(\"Erro aponta o campo idade\", function () {",
+									"    const campos = body.errors.map(e => e.field);",
+									"    pm.expect(campos).to.include(\"idade\");",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/animais",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"animais"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nome\": \"Fido\",\n    \"especie\": \"Cachorro\",\n    \"raca\": \"SRD\",\n    \"idade\": -5\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": [],
+					"description": "Requisito: validacao deve rejeitar idade negativa com 400."
+				},
+				{
+					"name": "Atualizar com status invalido (enum inexistente)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code e 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"const body = pm.response.json();",
+									"",
+									"pm.test(\"Mensagem indica corpo malformado\", function () {",
+									"    pm.expect(body.message.toLowerCase()).to.include(\"malformado\");",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/animais/{{animalId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"animais",
+								"{{animalId}}"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nome\": \"Rex\",\n    \"especie\": \"Cachorro\",\n    \"raca\": \"SRD\",\n    \"idade\": 4,\n    \"status\": \"FICOU_TRISTE\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": [],
+					"description": "Requisito: corpo malformado (valor fora do enum AnimalStatus) deve virar 400, nao 500."
+				},
+				{
+					"name": "Buscar com UUID malformado na URL",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code e 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"const body = pm.response.json();",
+									"",
+									"pm.test(\"Mensagem indica UUID invalido\", function () {",
+									"    pm.expect(body.message.toUpperCase()).to.include(\"UUID\");",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/animais/abc-nao-e-uuid",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"animais",
+								"abc-nao-e-uuid"
+							]
+						}
+					},
+					"response": [],
+					"description": "Requisito: MethodArgumentTypeMismatchException deve virar 400 (id nao e UUID valido), nao 500."
+				}
+			]
+		},
+		{
+			"name": "03 - Nao Encontrado (404)",
+			"description": "Cobre o AnimalNotFoundException para os tres verbos que dependem de um ID existente.",
+			"item": [
+				{
+					"name": "Buscar animal inexistente",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code e 404\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"const body = pm.response.json();",
+									"",
+									"pm.test(\"Resposta nao contem stack trace\", function () {",
+									"    pm.expect(body.trace).to.be.undefined;",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/animais/00000000-0000-0000-0000-000000000000",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"animais",
+								"00000000-0000-0000-0000-000000000000"
+							]
+						}
+					},
+					"response": [],
+					"description": "Requisito: GET /animais/{id} deve retornar 404 quando o animal nao existe, sem vazar stack trace."
+				},
+				{
+					"name": "Atualizar animal inexistente",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code e 404\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/animais/00000000-0000-0000-0000-000000000000",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"animais",
+								"00000000-0000-0000-0000-000000000000"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nome\": \"Fantasma\",\n    \"especie\": \"Cachorro\",\n    \"raca\": \"SRD\",\n    \"idade\": 1,\n    \"status\": \"DISPONIVEL\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": [],
+					"description": "Requisito: PUT /animais/{id} deve retornar 404 quando o animal nao existe."
+				},
+				{
+					"name": "Excluir animal inexistente",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code e 404\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/animais/00000000-0000-0000-0000-000000000000",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"animais",
+								"00000000-0000-0000-0000-000000000000"
+							]
+						}
+					},
+					"response": [],
+					"description": "Requisito: DELETE /animais/{id} deve retornar 404 quando o animal nao existe (nao deve dar 204 silencioso)."
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080"
+		},
+		{
+			"key": "animalId",
+			"value": ""
+		}
+	]
+}
